@@ -2,7 +2,6 @@ from game_data import data
 import random
 
 
-
 def get_account():
   """Get a account from game_data"""
   return random.choice(data)
@@ -37,48 +36,49 @@ def score_control(guess, score = 0):
   else:
     return score
 
-def game(account_a, account_b, score):
-  """Runs the game"""
-  if account_a == account_b:
-    account_b = get_account()
-  
-  followers_a = get_followers(account_a)
-  followers_b = get_followers(account_b)
-
-  # Get user guess:
-  print(f"Compare A: {format_data(account_a)}\n")
-  print(f"Against B: {format_data(account_b)}\n")
-  guess = input("Who have more followers? Type 'A' or 'B': ").lower()
+def dupes(a, b):
+	"""Check for duplicated accounts"""
+	if a == b:
+		b = get_account()
 
 
-  # Give feedback from guesses:
-  ## Check guess:
-  checker = check_guess(guess, followers_a, followers_b)
-  if not checker:
-   # Gives player feedback  
-    print(f"You guessed wrong ! Final score: {score}")
-    return
-  else:
-   # Score keeping:
-   ## Temporary variable (temp) to store score_control value 
-   temp = score_control(guess)
-   score += temp
-   print(f'Score: {score}')      
-  
-   continue_game = input('Keep playing? "Y" or "N": \n').lower   
-   if continue_game == 'n':
-    print("Thanks for playing !")
-    return
-   else:
-    account_a = account_b
-    account_b = get_account()
-    return game(account_a, account_b, score)
-  
-
+score = 0
 account_a = get_account()
 account_b = get_account()
 
+while True:
+	followers_a = get_followers(account_a)
+	followers_b = get_followers(account_b)
 
-keep_playing = False
-score = 0
-game(account_a, account_b, score)
+	print(f"Compare A: {format_data(account_a)}")
+	print(f"Against B: {format_data(account_b)}\n")
+
+	guess = input("Who have more followers? Type 'A' or 'B': \n").lower()
+
+	checker = check_guess(guess, followers_a, followers_b)
+
+
+
+	if checker:
+		score = score_control(checker, score)
+		print(f"You guessed right ! Current score: {score}\n")
+		if checker and guess == 'a':
+			account_b = get_account()
+			dupes(account_a, account_b)
+		else:
+			if checker and guess == 'b':
+				account_a = account_b
+				account_b = get_account()
+				dupes(account_a, account_b)
+	else:
+		score = score_control(checker, score)
+		print(f"You guessed wrong ! Final score: {score}\n")	
+		
+		play_again = input( 'Play again? "Y" or "N" ').lower()
+		if play_again == "n":
+			break
+		else:
+			account_a = get_account()
+			account_b = get_account()
+			dupes(account_a, account_b)
+			score = 0
